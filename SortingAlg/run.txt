@@ -1,0 +1,41 @@
+./ThompsonGroupOdd 1 > /Users/soren/Documents/tgo1
+gsort --parallel 8 -S 12G /Users/soren/Documents/tgo1 > /Users/soren/Documents/tgo1_sorted
+./getSolutionFromSortedFile < /Users/soren/Documents/tgo1_sorted +RTS -K1000M -RTS
+
+./ThompsonGroupOdd 2 > /Users/soren/Documents/tgo2
+gsort --parallel 8 -S 12G /Users/soren/Documents/tgo2 > /Users/soren/Documents/tgo2_sorted
+./getSolutionFromSortedFile < /Users/soren/Documents/tgo2_sorted +RTS -K1000M -RTS
+
+./ThompsonGroupOdd 3 > /Users/soren/Documents/tgo3
+gsort --parallel 8 -S 12G /Users/soren/Documents/tgo3 > /Users/soren/Documents/tgo3_sorted
+./getSolutionFromSortedFile < /Users/soren/Documents/tgo3_sorted +RTS -K1000M -RTS
+
+./ThompsonGroupOdd 4 > /Users/soren/Documents/tgo4
+gsort --parallel 8 -S 12G /Users/soren/Documents/tgo4 > /Users/soren/Documents/tgo4_sorted
+./getSolutionFromSortedFile < /Users/soren/Documents/tgo4_sorted +RTS -K1000M -RTS
+
+./ThompsonGroupOdd 5 > /Users/soren/Documents/tgo5
+gsort --parallel 8 -S 12G /Users/soren/Documents/tgo5 > /Users/soren/Documents/tgo5_sorted
+./getSolutionFromSortedFile < /Users/soren/Documents/tgo5_sorted +RTS -K1000M -RTS
+
+./ThompsonGroupOdd 6 > /Users/soren/Documents/tgo6
+gsort --parallel 8 -S 12G /Users/soren/Documents/tgo6 > /Users/soren/Documents/tgo6_sorted
+./getSolutionFromSortedFile < /Users/soren/Documents/tgo6_sorted +RTS -K1000M -RTS
+
+./ThompsonGroupOdd 7 > /Users/soren/Documents/tgo7
+gsort --parallel 8 -S 12G /Users/soren/Documents/tgo7 > /Users/soren/Documents/tgo7_sorted
+./getSolutionFromSortedFile < /Users/soren/Documents/tgo7_sorted +RTS -K1000M -RTS
+
+./ThompsonGroupOdd 8 > /Users/soren/Documents/tgo8
+gsort --parallel 8 -S 12G /Users/soren/Documents/tgo8 > /Users/soren/Documents/tgo8_sorted
+./getSolutionFromSortedFile < /Users/soren/Documents/tgo8_sorted +RTS -K1000M -RTS
+
+./ThompsonGroupOdd 9 > /Users/soren/Documents/tgo9
+gsort --parallel 8 -S 12G /Users/soren/Documents/tgo9 > /Users/soren/Documents/tgo9_sorted
+./getSolutionFromSortedFile < /Users/soren/Documents/tgo9_sorted +RTS -K1000M -RTS
+
+./ThompsonGroupOdd 10 > /Users/soren/Documents/tgo10
+gsort --parallel 8 -S 12G /Users/soren/Documents/tgo10 > /Users/soren/Documents/tgo10_sorted
+./getSolutionFromSortedFile < /Users/soren/Documents/tgo10_sorted +RTS -K1000M -RTS
+
+

@@ -1,0 +1,15 @@
+script -q /dev/null time ./test_simplified2 13 8 +RTS -N8 | tee 13sol
+
+ghc -O3 --make test_simplified2.hs -fforce-recomp -rtsopts -eventlog -threaded +RTS -N4
+
+
+script -q /dev/null time ./seq2 8 500 +RTS -N8 | tee seq2_8sol
+script -q /dev/null time ./seq2 9 500 +RTS -N8 | tee seq2_9sol
+script -q /dev/null time ./seq2 10 500 +RTS -N8 | tee seq2_10sol
+script -q /dev/null time ./seq2 11 500 +RTS -N8 | tee seq2_11sol
+script -q /dev/null time ./seq2 12 500 +RTS -N8 | tee seq2_12sol
+script -q /dev/null time ./seq2 13 500 +RTS -N8 | tee seq2_13sol
+script -q /dev/null time ./seq2 14 500 +RTS -N8 | tee seq2_14sol
+script -q /dev/null time ./seq2 15 500 +RTS -N8 | tee seq2_15sol
+
+script -q /dev/null time ./seq3 16 1000 +RTS -N8 | tee seq3_16sol

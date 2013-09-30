@@ -1,0 +1,1 @@
+script -q /dev/null time ./test_simplified2 13 8 +RTS -N8 | tee 13sol
