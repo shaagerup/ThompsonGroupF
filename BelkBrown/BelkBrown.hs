@@ -34,7 +34,9 @@ op X0 (Forest p1 xs1, Forest p2 xs2) = (Forest p1 xs1', Forest p2' xs2')
 op X1 (Forest p1 xs1, Forest p2 xs2) = (Forest p1 xs1', Forest p2 xs2')
 	where 
 		(ys1,ys2) = splitAt p2 xs2
-		(t1:t2:ys3) = if length ys2 == 1 then ys2++[Leaf] else ys2
+		(t1:t2:ys3) = case (length ys2) of
+			1 -> ys2++[Leaf]
+			_ -> ys2
 		xs2' = ys1 ++ [Node t1 t2] ++ ys3
 		xs1'
 		 | fLeafCount xs2' > fLeafCount xs1 = xs1++[Leaf]
@@ -57,11 +59,33 @@ op X1Inv (Forest p1 xs1, Forest p2 xs2) = (Forest p1 xs1', Forest p2 xs2')
 		xs1' = case e of 
 			Leaf -> snd $ modifyNthLeafPlural p1 xs1 (Node Leaf Leaf)
 			_ -> xs1
-		--xs1''
-		-- | fLeafCount xs2' > fLeafCount xs1' = xs1' ++ [Leaf]
-		-- | otherwise = xs1'
-		-- find det p1'e blad og extend dette! 
-		
+
+
+op' :: Generator -> FDiagram -> FDiagram
+op' X0 = trimHead . (op X0)
+op' X1 = reduce . (op X1)
+op' X0Inv = trimTail . (op X0Inv)
+op' X1Inv = reduce . (op X1Inv)
+
+trivialDiagram :: FDiagram
+trivialDiagram = (Forest 0 [Leaf], Forest 0 [Leaf]) 
+
+getDiagram :: [Generator] -> FDiagram
+getDiagram = foldr op' trivialDiagram
+
+elems :: Int -> [[Generator]]
+elems = map concat . elems' 
+	where
+		elems' 0 = [[]]
+		elems' n = concat [ map (e:) $ elems' (n-1) | e <- [[X0,X1],[X0,X1Inv],[X0Inv,X1Inv],[X1Inv,X0Inv],[X1,X0Inv],[X1,X0]]]
+
+trivialReps :: Int -> [[Generator]]
+trivialReps = filter (\es -> getDiagram es == trivialDiagram) . elems
+
+
+--main = mapM_ putStrLn $ map (show . length . trivialReps) [1..]
+
+
 -- replaces nth leaf w. l'
 modifyNthLeaf :: Int -> Tree -> Tree -> (Int,Tree)
 modifyNthLeaf n Leaf l'
@@ -130,6 +154,20 @@ removeCarets (c:cs) = (removeCarets cs) . (removeCaret c)
 reduce :: FDiagram -> FDiagram
 reduce d@(f1,f2) = (removeCarets cs f1, removeCarets cs f2)
 	where cs = opposingCarets d
+
+{- Trim functions for removal of excess leafs in the head and tail of the treelists. -}
+mirror :: FDiagram -> FDiagram
+mirror (Forest p1 ts1, Forest p2 ts2) = (Forest (length ts1 - p1 - 1) (reverse ts1),Forest (length ts2 - p2 - 1) (reverse ts2))
+
+trimHead :: FDiagram -> FDiagram
+trimHead d@(Forest p1 (Leaf:ts1), Forest p2 (Leaf:ts2))
+ | p1 > 0 && p2 > 0 = (Forest (p1-1) ts1, Forest (p2-1) ts2)
+ | otherwise = d
+trimHead d = d
+
+trimTail :: FDiagram -> FDiagram
+trimTail = mirror . trimHead . mirror
+
 
 
 -- example forest diagrams
@@ -205,8 +243,3 @@ test 8 = op X1Inv ex336diagg == (exDom, exRan)
 
 testAll :: Bool
 testAll = and $ map test [1..8]
-
-{-
-TODO:
-Apply reduce as part of operations + Trim excess leafs in the head and tail of the treelists.
--}
