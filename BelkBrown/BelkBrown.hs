@@ -57,7 +57,7 @@ op X1Inv (Forest p1 xs1, Forest p2 xs2) = (Forest p1 xs1', Forest p2 xs2')
 			Node t1 t2 -> [t1,t2]
 		xs2' = take p2 xs2 ++ xs2e ++ drop (p2+1) xs2
 		xs1' = case e of 
-			Leaf -> snd $ modifyNthLeafPlural p1 xs1 (Node Leaf Leaf)
+			Leaf -> snd $ modifyNthLeafPlural p2 xs1 (Node Leaf Leaf)
 			_ -> xs1
 
 
@@ -72,18 +72,26 @@ trivialDiagram = (Forest 0 [Leaf], Forest 0 [Leaf])
 
 getDiagram :: [Generator] -> FDiagram
 getDiagram = foldr op' trivialDiagram
-
+{-}
 elems :: Int -> [[Generator]]
 elems = map concat . elems' 
 	where
 		elems' 0 = [[]]
 		elems' n = concat [ map (e:) $ elems' (n-1) | e <- [[X0,X1],[X0,X1Inv],[X0Inv,X1Inv],[X1Inv,X0Inv],[X1,X0Inv],[X1,X0]]]
 
+
+-}
+
+elems' _ 0 = [[]]
+elems' X0 n = concat [map (e:) $elems' e (n-1) | e <- [X0,X1,X1Inv]]
+elems' X1 n = concat [map (e:) $elems' e (n-1) | e <- [X0,X1,X0Inv]]
+elems' X0Inv n = concat [map (e:) $elems' e (n-1) | e <- [X1,X0Inv,X1Inv]]
+elems' X1Inv n = concat [map (e:) $elems' e (n-1) | e <- [X0,X0Inv,X1Inv]]
+elems n = concat [map (e:) $elems' e (n-1) | e <- [X0,X1,X0Inv,X1Inv]]
+--main = mapM_ putStrLn $ map (show . length . trivialReps) [1..]
+
 trivialReps :: Int -> [[Generator]]
 trivialReps = filter (\es -> getDiagram es == trivialDiagram) . elems
-
-
---main = mapM_ putStrLn $ map (show . length . trivialReps) [1..]
 
 
 -- replaces nth leaf w. l'
@@ -146,13 +154,16 @@ removeCaret n (Forest p ts) = Forest p ts'
 	where
 		ts' = snd $ removeNthCaretPlural n ts
 
-removeCarets :: [Int] -> Forest -> Forest
+{-removeCarets :: [Int] -> Forest -> Forest
 removeCarets [] = id
 removeCarets (c:cs) = (removeCarets cs) . (removeCaret c)
-
+-}
 -- reduce deletes opposing pairs of carets, see BelkBrown page 10.
+
 reduce :: FDiagram -> FDiagram
-reduce d@(f1,f2) = (removeCarets cs f1, removeCarets cs f2)
+reduce d@(f1,f2) = case cs of 
+		[] -> d
+		c:_ -> reduce (removeCaret c f1, removeCaret c f2)
 	where cs = opposingCarets d
 
 {- Trim functions for removal of excess leafs in the head and tail of the treelists. -}
