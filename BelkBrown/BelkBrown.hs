@@ -57,7 +57,7 @@ op X1Inv (Forest p1 xs1, Forest p2 xs2) = (Forest p1 xs1', Forest p2 xs2')
 			Node t1 t2 -> [t1,t2]
 		xs2' = take p2 xs2 ++ xs2e ++ drop (p2+1) xs2
 		xs1' = case e of 
-			Leaf -> snd $ modifyNthLeafPlural p2 xs1 (Node Leaf Leaf)
+			Leaf -> snd $ modifyNthLeafPlural (fLeafCount $ take p2 xs2) xs1 (Node Leaf Leaf)
 			_ -> xs1
 
 
@@ -65,22 +65,16 @@ op' :: Generator -> FDiagram -> FDiagram
 op' X0 = trimHead . (op X0)
 op' X1 = reduce . (op X1)
 op' X0Inv = trimTail . (op X0Inv)
-op' X1Inv = reduce . (op X1Inv)
+op' X1Inv = trimTail . reduce . (op X1Inv)
 
 trivialDiagram :: FDiagram
 trivialDiagram = (Forest 0 [Leaf], Forest 0 [Leaf]) 
 
 getDiagram :: [Generator] -> FDiagram
 getDiagram = foldr op' trivialDiagram
-{-}
-elems :: Int -> [[Generator]]
-elems = map concat . elems' 
-	where
-		elems' 0 = [[]]
-		elems' n = concat [ map (e:) $ elems' (n-1) | e <- [[X0,X1],[X0,X1Inv],[X0Inv,X1Inv],[X1Inv,X0Inv],[X1,X0Inv],[X1,X0]]]
 
-
--}
+--main = putStrLn $ show $ length $ trivialReps 14
+main = mapM_ putStrLn $ map (show . length . trivialReps) [1..]
 
 elems' _ 0 = [[]]
 elems' X0 n = concat [map (e:) $elems' e (n-1) | e <- [X0,X1,X1Inv]]
@@ -88,7 +82,6 @@ elems' X1 n = concat [map (e:) $elems' e (n-1) | e <- [X0,X1,X0Inv]]
 elems' X0Inv n = concat [map (e:) $elems' e (n-1) | e <- [X1,X0Inv,X1Inv]]
 elems' X1Inv n = concat [map (e:) $elems' e (n-1) | e <- [X0,X0Inv,X1Inv]]
 elems n = concat [map (e:) $elems' e (n-1) | e <- [X0,X1,X0Inv,X1Inv]]
---main = mapM_ putStrLn $ map (show . length . trivialReps) [1..]
 
 trivialReps :: Int -> [[Generator]]
 trivialReps = filter (\es -> getDiagram es == trivialDiagram) . elems
@@ -179,7 +172,12 @@ trimHead d = d
 trimTail :: FDiagram -> FDiagram
 trimTail = mirror . trimHead . mirror
 
+---
 
+{-
+helping functions
+-}
+rotations xs = take (length xs) $ zipWith (++) (tails xs) (inits xs) 
 
 -- example forest diagrams
 ex332diag = (exDom, exRan)
