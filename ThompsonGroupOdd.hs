@@ -1,3 +1,4 @@
+module ThompsonGroupOdd where
 {-
 New algorithm related to the Thompson Group
 -}
@@ -56,10 +57,12 @@ convertTuple' _ [] = []
 convertTuple :: [Int] -> [Int]
 convertTuple (x:y:xs) = x:(g x y):convertTuple' (g x y) xs
 
+elems :: Int -> [[Int]]
+elems = map convertTuple . specialTuples
+
 main :: IO ()
 main = do
 	(nStr:_) <- getArgs
 	let 
 		n = (read nStr :: Int)
-		res = specialTuples n
-	mapM_ putStrLn $ map show $ map (evaluate n) $ map convertTuple $ res
+	mapM_ putStrLn $ map show $ map (evaluate n) $ elems n

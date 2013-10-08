@@ -1,3 +1,5 @@
+module BelkBrown where
+
 {-
 This program implements the representation of the Thompson Group F given in 
 Section 3.2 (Forest Diagrams for Elements of PL2(R))
@@ -12,8 +14,6 @@ data Forest = Forest Int [Tree] deriving (Eq,Show)
 type FDiagram = (Forest,Forest) 
 -- first is domain, second is range. I.e. first is the bottom forest, second is the top forest! 
 -- When working with FDiagram, we assume that both forests have equally many leafs.
-
-
 
 
 leafCount :: Tree -> Int
@@ -67,27 +67,9 @@ op' X1 = reduce . (op X1)
 op' X0Inv = trimTail . (op X0Inv)
 op' X1Inv = trimTail . reduce . (op X1Inv)
 
-trivialDiagram :: FDiagram
-trivialDiagram = (Forest 0 [Leaf], Forest 0 [Leaf]) 
-
-getDiagram :: [Generator] -> FDiagram
-getDiagram = foldr op' trivialDiagram
-
---main = putStrLn $ show $ length $ trivialReps 14
-main = mapM_ putStrLn $ map (show . length . trivialReps) [1..]
-
-elems' _ 0 = [[]]
-elems' X0 n = concat [map (e:) $elems' e (n-1) | e <- [X0,X1,X1Inv]]
-elems' X1 n = concat [map (e:) $elems' e (n-1) | e <- [X0,X1,X0Inv]]
-elems' X0Inv n = concat [map (e:) $elems' e (n-1) | e <- [X1,X0Inv,X1Inv]]
-elems' X1Inv n = concat [map (e:) $elems' e (n-1) | e <- [X0,X0Inv,X1Inv]]
-elems n = concat [map (e:) $elems' e (n-1) | e <- [X0,X1,X0Inv,X1Inv]]
-
-trivialReps :: Int -> [[Generator]]
-trivialReps = filter (\es -> getDiagram es == trivialDiagram) . elems
 
 
--- replaces nth leaf w. l'
+-- replaces nth leaf with l'
 modifyNthLeaf :: Int -> Tree -> Tree -> (Int,Tree)
 modifyNthLeaf n Leaf l'
  | n == 0 = (n-1, l')
@@ -147,12 +129,7 @@ removeCaret n (Forest p ts) = Forest p ts'
 	where
 		ts' = snd $ removeNthCaretPlural n ts
 
-{-removeCarets :: [Int] -> Forest -> Forest
-removeCarets [] = id
-removeCarets (c:cs) = (removeCarets cs) . (removeCaret c)
--}
 -- reduce deletes opposing pairs of carets, see BelkBrown page 10.
-
 reduce :: FDiagram -> FDiagram
 reduce d@(f1,f2) = case cs of 
 		[] -> d
@@ -172,83 +149,30 @@ trimHead d = d
 trimTail :: FDiagram -> FDiagram
 trimTail = mirror . trimHead . mirror
 
----
+
+--main = putStrLn $ show $ length $ trivialReps 14
+--main = mapM_ putStrLn $ map (show . length . trivialReps) [1..]
+
+trivialDiagram :: FDiagram
+trivialDiagram = (Forest 0 [Leaf], Forest 0 [Leaf]) 
+
+evaluate :: [Generator] -> FDiagram
+evaluate = foldr op' trivialDiagram
+
+isTrivial :: FDiagram -> Bool
+isTrivial = (==) trivialDiagram
 
 {-
-helping functions
+elems' :: Generator -> Int -> [[Generator]]
+elems' _ 0 = [[]]
+elems' X0 n = concat [map (e:) $elems' e (n-1) | e <- [X0,X1,X1Inv]]
+elems' X1 n = concat [map (e:) $elems' e (n-1) | e <- [X0,X1,X0Inv]]
+elems' X0Inv n = concat [map (e:) $elems' e (n-1) | e <- [X1,X0Inv,X1Inv]]
+elems' X1Inv n = concat [map (e:) $elems' e (n-1) | e <- [X0,X0Inv,X1Inv]]
+
+elems :: Int -> [[Generator]]
+elems n = concat [map (e:) $elems' e (n-1) | e <- [X0,X1,X0Inv,X1Inv]]
+
+trivialReps :: Int -> [[Generator]]
+trivialReps = filter (isTrivial . evaluate) . elems
 -}
-rotations xs = take (length xs) $ zipWith (++) (tails xs) (inits xs) 
-
--- example forest diagrams
-ex332diag = (exDom, exRan)
-	where
-		exDom = Forest 1 [Node (Node Leaf Leaf) (Node Leaf Leaf), Leaf, Leaf]
-		exRan = Forest 1 [Leaf, Node Leaf Leaf, Node (Node Leaf Leaf) Leaf]
-
-ex333diag = (exDom, exRan)
-	where
-		exDom = Forest 0 [Node (Node Leaf Leaf) (Node Leaf Leaf), Leaf]
-		exRan = Forest 1 [Node (Node Leaf Leaf) Leaf, Node Leaf Leaf]
-
-ex334diag = (exDom, exRan)
-	where
-		exDom = Forest 1 [Leaf,Leaf,Leaf,Node Leaf (Node Leaf Leaf), Leaf, Leaf]
-		exRan = Forest 1 [Node (Node Leaf Leaf) (Node Leaf Leaf), Leaf, Leaf, Node Leaf Leaf]
-
-ex336diagf = (exDom, exRan)
-	where
-		exDom = Forest 0 [Leaf, Node (Node Leaf Leaf) Leaf]
-		exRan = Forest 0 [Node (Node Leaf Leaf) (Node Leaf Leaf)]
-
-ex336diagg = (exDom, exRan)
-	where
-		exDom = Forest 1 [Node (Node Leaf Leaf) Leaf, Leaf]
-		exRan = Forest 1 [Leaf, Leaf, Node Leaf Leaf]
-
-test :: Int -> Bool
-test 1 = reduce exDiag == exDiag'
-	where
-		exDom = Forest 1 [Node (Node Leaf Leaf) (Node Leaf Leaf), Node Leaf Leaf]
-		exRan = Forest 1 [Leaf, Leaf, Node (Node Leaf Leaf) Leaf, Leaf]
-		exDiag = (exDom,exRan)
-		exDom' = Forest 1 [Node (Node Leaf Leaf) Leaf,Node Leaf Leaf]
-		exRan' = Forest 1 [Leaf,Leaf,Node Leaf Leaf,Leaf]
-		exDiag' = (exDom',exRan')
-
-test 2 = op X0 ex332diag == (exDom, exRan)
-	where
-		(exDom,_) = ex332diag
-		exRan = Forest 2 [Leaf, Node Leaf Leaf, Node (Node Leaf Leaf) Leaf]
-
-test 3 = op X1 ex332diag == (exDom, exRan)
-	where
-		(exDom,_) = ex332diag
-		exRan = Forest 1 [Leaf, Node (Node Leaf Leaf) (Node (Node Leaf Leaf) Leaf)]
-
-test 4 = op X0 ex333diag == (exDom, exRan)
-	where
-		exDom = Forest 0 [Node (Node Leaf Leaf) (Node Leaf Leaf), Leaf, Leaf]
-		exRan = Forest 2 [Node (Node Leaf Leaf) Leaf, Node Leaf Leaf, Leaf]
-
-test 5 = op X1 ex333diag == (exDom, exRan)
-	where
-		exDom = Forest 0 [Node (Node Leaf Leaf) (Node Leaf Leaf), Leaf, Leaf]
-		exRan = Forest 1 [Node (Node Leaf Leaf) Leaf, Node (Node Leaf Leaf) Leaf]
-
-test 6 = reduce (op X1 ex334diag) == (exDom, exRan)
-	where
-		exDom = Forest 1 [Leaf,Leaf,Leaf,Node Leaf Leaf, Leaf, Leaf]
-		exRan = Forest 1 [Node (Node Leaf Leaf) (Node Leaf Leaf), Leaf, Node Leaf Leaf]
-
-test 7 = (op X1Inv ex336diagf) == (exDom, exRan)
-	where
-		(exDom,_) = ex336diagf
-		exRan = Forest 0 [Node Leaf Leaf, Node Leaf Leaf]
-
-test 8 = op X1Inv ex336diagg == (exDom, exRan)
-	where
-		exDom = Forest 1 [Node (Node Leaf (Node Leaf Leaf)) Leaf, Leaf]
-		exRan = Forest 1 [Leaf, Leaf, Leaf, Node Leaf Leaf]
-
-testAll :: Bool
-testAll = and $ map test [1..8]
