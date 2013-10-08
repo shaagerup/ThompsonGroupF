@@ -1,7 +1,5 @@
 module ThompsonGroup where
-{-
-New algorithm related to the Thompson Group
--}
+
 import Control.Parallel.Strategies
 import System.Environment
 import System.IO
@@ -23,14 +21,8 @@ evalFunk :: (Int -> Int -> Int) -> Int -> [Int] -> Int
 evalFunk a n [] 		= n
 evalFunk a n (x:xs) 	= a x (evalFunk a n xs)
 
-evaluate :: [Int] -> [Int]
-evaluate xs = map (\m -> evalFunk b m xs) [0..nUpperbound-1] 
-	where
-		n = length xs
-		nUpperbound = 2^(n + 1)
-		
-isTrivial :: [Int] -> Bool
-isTrivial = and . (zipWith (==) [0..])
+evaluate :: Int -> [Int] -> [Int]
+evaluate n xs = map (\m -> evalFunk b m xs) [0..nUpperbound-1] where nUpperbound = 2^(n + 1)
 
 {- tuples of length n in base b-}
 tuplesByBase :: Int -> Int -> [[Int]]
@@ -50,10 +42,3 @@ convertTuple (x:xs) = x:convertTuple' x xs
 
 elems :: Int -> [[Int]]
 elems = map convertTuple . specialTuples
-
-main :: IO ()
-main = do
-	(nStr:_) <- getArgs
-	let 
-		n = (read nStr :: Int)
-	mapM_ putStrLn $ map show $ map evaluate $ elems n
