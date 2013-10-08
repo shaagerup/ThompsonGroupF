@@ -1,6 +1,5 @@
 module ThompsonGroup where
 
-import Control.Parallel.Strategies
 import System.Environment
 import System.IO
 

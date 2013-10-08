@@ -1,6 +1,5 @@
 module ThompsonGroupOdd where
 
-import Control.Parallel.Strategies
 import System.Environment
 import System.IO
 
@@ -42,7 +41,7 @@ tuplesByBase :: Int -> Int -> [[Int]]
 tuplesByBase _ 0 = [[]]
 tuplesByBase b n = concat [ map (i:) $ tuplesByBase b (n-1) | i <- [0..b-1]]
 
-{- Første ciffer er fra 0..5, resten er fra 0..3 -}
+{- Første ciffer er fra 0..2, resten er fra 0..3 -}
 specialTuples :: Int -> [[Int]]
 specialTuples n = concat [ map (i:) $ tuplesByBase 4 n | i <- [0..2]]
 
