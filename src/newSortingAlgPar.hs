@@ -1,11 +1,12 @@
 import System.Environment
 import System.IO
-import Control.Parallel.Strategies
 
 import BelkBrown
 import qualified ThompsonGroup
 import qualified ThompsonGroupOdd
 import qualified ThompsonParallel
+
+import Data.List.Split
 
 {-
 NB: For now, the parallel strategy is *not* faster than the serial! 
@@ -64,11 +65,11 @@ elems n = case r of
 
 main :: IO ()
 main = do
-	(nStr:pStr:_) <- getArgs
+	(argStr:_) <- getArgs
 	let 
+		nStr:pStr:tStr:[] = splitOn "_" argStr
 		n = (read nStr :: Int)
 		p = (read pStr :: Int)
+		t = (read tStr :: Int)
 		ts = tasks n p
-		f = map evaluate . instances n
-		res = parMap rseq f ts
-	mapM_ putStrLn $ map show $ concat res
+	mapM_ putStrLn $ map show $ map evaluate . instances n $ ts!!t
