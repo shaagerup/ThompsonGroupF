@@ -12,7 +12,7 @@ done
 
 ppss -f /tmp/tgtasks_$1 -c './src/newSortingAlgPar "$ITEM" > /tmp/tg"$ITEM"'
 
-cat /tmp/tg$1_* | gsort --parallel 8 -S 12G > /tmp/tg$1_sorted
+cat /tmp/tg$1_* | gsort --parallel $2 -S 12G > /tmp/tg$1_sorted
 ./src/getSolutionFromSortedFile < /tmp/tg$1_sorted +RTS -K1000M -RTS
 
 rm -rf ppss_dir
