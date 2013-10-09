@@ -1,4 +1,5 @@
 import BelkBrown
+import BBDrawing
 import Data.List
 {-
 helping functions
@@ -9,28 +10,28 @@ helping functions
 -- example forest diagrams
 ex332diag = (exDom, exRan)
 	where
-		exDom = Forest 1 [Node (Node Leaf Leaf) (Node Leaf Leaf), Leaf, Leaf]
-		exRan = Forest 1 [Leaf, Node Leaf Leaf, Node (Node Leaf Leaf) Leaf]
+		exDom = Forest 1 [N (N L L) (N L L), L, L]
+		exRan = Forest 1 [L, N L L, N (N L L) L]
 
 ex333diag = (exDom, exRan)
 	where
-		exDom = Forest 0 [Node (Node Leaf Leaf) (Node Leaf Leaf), Leaf]
-		exRan = Forest 1 [Node (Node Leaf Leaf) Leaf, Node Leaf Leaf]
+		exDom = Forest 0 [N (N L L) (N L L), L]
+		exRan = Forest 1 [N (N L L) L, N L L]
 
 ex334diag = (exDom, exRan)
 	where
-		exDom = Forest 1 [Leaf,Leaf,Leaf,Node Leaf (Node Leaf Leaf), Leaf, Leaf]
-		exRan = Forest 1 [Node (Node Leaf Leaf) (Node Leaf Leaf), Leaf, Leaf, Node Leaf Leaf]
+		exDom = Forest 1 [L,L,L,N L (N L L), L, L]
+		exRan = Forest 1 [N (N L L) (N L L), L, L, N L L]
 
 ex336diagf = (exDom, exRan)
 	where
-		exDom = Forest 0 [Leaf, Node (Node Leaf Leaf) Leaf]
-		exRan = Forest 0 [Node (Node Leaf Leaf) (Node Leaf Leaf)]
+		exDom = Forest 0 [L, N (N L L) L]
+		exRan = Forest 0 [N (N L L) (N L L)]
 
 ex336diagg = (exDom, exRan)
 	where
-		exDom = Forest 1 [Node (Node Leaf Leaf) Leaf, Leaf]
-		exRan = Forest 1 [Leaf, Leaf, Node Leaf Leaf]
+		exDom = Forest 1 [N (N L L) L, L]
+		exRan = Forest 1 [L, L, N L L]
 
 
 b :: Int -> [Generator]
@@ -56,47 +57,47 @@ convOdd (x:xs) = c x ++ conv xs
 test :: Int -> Bool
 test 1 = reduce exDiag == exDiag'
 	where
-		exDom = Forest 1 [Node (Node Leaf Leaf) (Node Leaf Leaf), Node Leaf Leaf]
-		exRan = Forest 1 [Leaf, Leaf, Node (Node Leaf Leaf) Leaf, Leaf]
+		exDom = Forest 1 [N (N L L) (N L L), N L L]
+		exRan = Forest 1 [L, L, N (N L L) L, L]
 		exDiag = (exDom,exRan)
-		exDom' = Forest 1 [Node (Node Leaf Leaf) Leaf,Node Leaf Leaf]
-		exRan' = Forest 1 [Leaf,Leaf,Node Leaf Leaf,Leaf]
+		exDom' = Forest 1 [N (N L L) L,N L L]
+		exRan' = Forest 1 [L,L,N L L,L]
 		exDiag' = (exDom',exRan')
 
 test 2 = op X0 ex332diag == (exDom, exRan)
 	where
 		(exDom,_) = ex332diag
-		exRan = Forest 2 [Leaf, Node Leaf Leaf, Node (Node Leaf Leaf) Leaf]
+		exRan = Forest 2 [L, N L L, N (N L L) L]
 
 test 3 = op X1 ex332diag == (exDom, exRan)
 	where
 		(exDom,_) = ex332diag
-		exRan = Forest 1 [Leaf, Node (Node Leaf Leaf) (Node (Node Leaf Leaf) Leaf)]
+		exRan = Forest 1 [L, N (N L L) (N (N L L) L)]
 
 test 4 = op X0 ex333diag == (exDom, exRan)
 	where
-		exDom = Forest 0 [Node (Node Leaf Leaf) (Node Leaf Leaf), Leaf, Leaf]
-		exRan = Forest 2 [Node (Node Leaf Leaf) Leaf, Node Leaf Leaf, Leaf]
+		exDom = Forest 0 [N (N L L) (N L L), L, L]
+		exRan = Forest 2 [N (N L L) L, N L L, L]
 
 test 5 = op X1 ex333diag == (exDom, exRan)
 	where
-		exDom = Forest 0 [Node (Node Leaf Leaf) (Node Leaf Leaf), Leaf, Leaf]
-		exRan = Forest 1 [Node (Node Leaf Leaf) Leaf, Node (Node Leaf Leaf) Leaf]
+		exDom = Forest 0 [N (N L L) (N L L), L, L]
+		exRan = Forest 1 [N (N L L) L, N (N L L) L]
 
 test 6 = reduce (op X1 ex334diag) == (exDom, exRan)
 	where
-		exDom = Forest 1 [Leaf,Leaf,Leaf,Node Leaf Leaf, Leaf, Leaf]
-		exRan = Forest 1 [Node (Node Leaf Leaf) (Node Leaf Leaf), Leaf, Node Leaf Leaf]
+		exDom = Forest 1 [L,L,L,N L L, L, L]
+		exRan = Forest 1 [N (N L L) (N L L), L, N L L]
 
 test 7 = (op X1Inv ex336diagf) == (exDom, exRan)
 	where
 		(exDom,_) = ex336diagf
-		exRan = Forest 0 [Node Leaf Leaf, Node Leaf Leaf]
+		exRan = Forest 0 [N L L, N L L]
 
 test 8 = op X1Inv ex336diagg == (exDom, exRan)
 	where
-		exDom = Forest 1 [Node (Node Leaf (Node Leaf Leaf)) Leaf, Leaf]
-		exRan = Forest 1 [Leaf, Leaf, Leaf, Node Leaf Leaf]
+		exDom = Forest 1 [N (N L (N L L)) L, L]
+		exRan = Forest 1 [L, L, L, N L L]
 
 {-
 B0B1B2 = I
