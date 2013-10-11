@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Thompson Group F - Belk-Brown Forest Normal Form</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<script src="jquery-1.9.0.min.js"></script>
+	<script type="text/javascript">
+	
+	var drawDiagram = function (context, diagram, f) {
+		drawForest(context, diagram[0], f);
+		drawForest(context, diagram[1], f);
+		//console.log(diagram[1]);
+	};
+	
+	var drawForest = function (context, forest, f) {
+		drawTreeList(context, forest[1], forest[0], f);
+	};
+	
+	var drawTreeList = function (context, ts, j, f) {
+		//console.log(j);
+		for (var i in ts) {
+			if (i == j) {
+	       		context.strokeStyle = '#ff0000';
+	    		context.fillStyle = '#ff0000';
+			}
+			drawTree(context, ts[i], f);
+			if (i==j) {
+				context.strokeStyle = '#000000';
+	        	context.fillStyle = '#000000';
+			}
+		}
+	};
+	
+	var drawLine = function (context, p1, p2, f)
+	{
+		var q1=p1;
+		var q2=p2;
+		
+		if (f!==undefined) {
+			//console.log('f is defined');
+			q1 = f(p1);
+			q2 = f(p2);
+		}
+		//console.log('drawing line between: ', q1, q2);
+
+		
+        context.beginPath();
+	   	context.moveTo(q1.x, q1.y);
+	   	context.lineTo(q2.x, q2.y);
+		context.stroke();
+		
+	}
+	var pointRadius = 2;
+	
+	var drawTree = function (context, t, f) {
+		if (Object.prototype.toString.call(t) === '[object Array]') // Node
+		{
+			//console.log('Node',t);
+			// draw from current point to children, and call recursively:
+			drawLine(context, getPoint(t), getPoint(t[1]),f);
+			drawLine(context, getPoint(t), getPoint(t[2]),f);
+			drawTree(context, t[1],f);
+			drawTree(context, t[2],f);
+		}
+		else
+		{
+			// Do nothing for leafs
+			//console.log('Leaf',t);
+			var p = f(t);
+			context.fillRect(p.x-pointRadius, p.y-pointRadius, 2*pointRadius, 2*pointRadius);
+			//console.log('drawing point',p);
+		}
+	}
+	
+	var getPoint = function (t)
+	{
+		if (Object.prototype.toString.call(t) === '[object Array]') // Node
+		{
+			return t[0];
+		}
+		else
+		{
+			return t;
+		}
+	}
+	
+	var func = [];
+	
+	var invert = function (xs) {
+		return xs.map(function(a){
+			switch (a){
+				case 0: return 1;
+				case 1: return 0;
+				case 2: return 3;
+				case 3: return 2; 
+			}
+		}).reverse();
+	};
+	
+	var describe = function (xs) {
+		return "[" + xs.map(function(a){
+			switch (a) {
+				case 0: return 'X<sub>0</sub>';
+				case 1: return 'X<sub>0</sub><sup>-1</sup>';
+				case 2: return 'X<sub>1</sub>';
+				case 3: return 'X<sub>1</sub><sup>-1</sup>';
+			}
+		}).join() + "]";
+	}
+	
+	var apply = function(x,xs) {
+		
+		var undo = false;
+		switch (x) {
+			case 0 : undo = xs[0]==1; break;
+			case 1 : undo = xs[0]==0; break;
+			case 2 : undo = xs[0]==3; break;
+			case 3 : undo = xs[0]==2; break;
+		}
+		if (undo) 
+		{
+			xs.shift();
+		}
+		else
+		{
+			xs.unshift(x);
+		}
+	}
+	
+	
+	var performDrawing = function(){
+		$('#word').html(describe(func));
+	
+		$.ajax('/api/BelkBrown/getDiagram/', {
+			data : JSON.stringify([func]),
+			method : 'POST',
+			contentType: 'application/json',
+		}).success(function (json) {
+			var temp = JSON.parse(json);
+			var bounds = temp[0];
+			var diag = temp[1];
+			var canvas = document.getElementById("canvas");
+		    var context = canvas.getContext("2d");
+			
+			var scale = 50;
+			
+			canvas.width = Math.round(scale*(bounds[1].x - bounds[0].x)) + 2*pointRadius;
+			canvas.height = Math.round(scale*(bounds[1].y - bounds[0].y)) + 2*pointRadius;
+			console.log(bounds[1].y - bounds[0].y, bounds[0].y, bounds[1].y);
+			
+		
+			drawDiagram(context, diag, function (p) {
+				return {
+					x : Math.round(scale*p.x) + pointRadius, 
+					y : Math.round(scale*(p.y - bounds[0].y)) + pointRadius //+ 100*bounds[0].y
+				};
+			});
+			
+			//drawLine(context, {})
+			//context.fillRect(50, 25, 150, 100);
+			//drawLine(context, {x:100,y:100}, {x:50,y:150});
+		}).error(function () {
+			console.log('error');
+		});
+	}
+
+	$(function () {
+		
+	$(document).keydown(function(e){
+	    if (e.keyCode == 37) { 
+			apply(1,func);
+			performDrawing();
+	       return false;
+	    }
+	    if (e.keyCode == 39) { 
+			apply(0,func);
+			performDrawing();
+	       return false;
+	    }
+	    if (e.keyCode == 38) { 
+			apply(2,func);
+			performDrawing();
+	       return false;
+	    }
+	    if (e.keyCode == 40) { 
+			apply(3,func);
+			performDrawing();
+	       return false;
+	    }
+	    if (e.keyCode == 8) {  // Backspace
+			func.shift();
+			performDrawing();
+	       return false;
+	    }
+	    if (e.keyCode == 27) {  // ESC
+			func = [];
+			performDrawing();
+	       return false;
+	    }
+	    if (e.keyCode == 13) {  // Enter
+			func = invert(func);
+			performDrawing();
+	       return false;
+	    }
+		console.log(e.keyCode);
+	});
+	performDrawing();
+		
+		
+		
+	});
+	
+	</script>
+	<style>
+	body {
+		font-family: sans-serif;
+	}
+	
+	#word,#forest,h2,h3,#toolbar {
+		text-align:center;
+	}
+	
+	#word {
+		background: #ffc;
+		border: 1px solid #ddd;
+		padding: 10px;
+	}
+	
+	#forest {
+		padding: 10px 0;
+	}
+	</style>	
+</head>
+<body>
+	<h2>Thompson Group <i>F</i></h2>
+	<h3>Belk-Brown Forest representation</h3>
+	<p id="toolbar">
+		<button onclick="func = invert(func); performDrawing()">Invert [Enter]</button>
+		<button onclick="func.shift(); performDrawing()">Undo [Backspace]</button>
+		<button onclick="func = []; performDrawing()">Reset [Esc]</button>
+	</p>
+	<div id="word"></div>
+	<div id="forest">
+	<canvas id="canvas"></canvas>
+	</div>
+</body>
+</html>
