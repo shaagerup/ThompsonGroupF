@@ -7,6 +7,10 @@ of http://arxiv.org/pdf/math/0305412v1.pdf
 -}
 import Data.List
 import Data.Tuple
+import Data.Serialize
+import Data.Serialize.Get
+import Control.Monad
+import qualified Data.ByteString 
 
 data Generator = X0 | X1 | X0Inv | X1Inv deriving (Eq,Show)
 data Tree = N Tree Tree | L deriving (Eq,Show)
@@ -15,6 +19,51 @@ type FDiagram = (Forest,Forest)
 -- first is domain, second is range. I.e. first is the bottom forest, second is the top forest! 
 -- When working with FDiagram, we assume that both forests have equally many leafs.
 
+instance Enum Generator where
+    fromEnum            = \x -> case x of
+							X0 -> 0
+							X0Inv -> 1
+							X1 -> 2
+							X1Inv -> 3
+    toEnum          = (!!) [X0,X0Inv,X1,X1Inv]
+    enumFrom c        = map toEnum [fromEnum c .. fromEnum X1Inv]
+    enumFromThen c c' = map toEnum [fromEnum c, fromEnum c' .. fromEnum lastChar]
+                      where lastChar | fromEnum c' < fromEnum c    = X0
+                                     | otherwise = X1Inv
+
+instance Serialize Generator where
+    put     = putWord8 . fromIntegral . fromEnum
+    get     = liftM (toEnum . fromIntegral) getWord8
+
+putTree :: Putter Tree
+putTree (N t1 t2) = putListOf putTree [t1,t2]
+putTree L = putListOf putTree []
+
+getTree :: Get Tree
+getTree = do
+	l <- getListOf getTree
+	return $ case l of
+		[] -> L
+		[t1,t2] -> N t1 t2
+
+instance Serialize Tree where
+    put = putTree
+    get = getTree
+
+instance Serialize Forest where
+	put (Forest p ts) = put p >> putListOf put ts
+	get = do
+		p <- get
+		ts <- getListOf get
+		return $ Forest p ts
+
+
+encodeDiagram :: FDiagram -> Data.ByteString.ByteString
+encodeDiagram d = Data.ByteString.concat [d',l] 
+	where
+		d' = encode d
+		l = encode $ (Data.ByteString.length d') `div` 8
+		
 
 leafCount :: Tree -> Int
 leafCount L = 1
