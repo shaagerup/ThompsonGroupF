@@ -11,6 +11,14 @@ Please
 - make sure that there is plenty of space in the /tmp/ directory of the server
 
 
+#### New algorithm with standard generators (X0,X1,X0Inv,X1Inv)
+
+Follow the guide below, except for running using
+
+    time ./runsortingalgpar_simple.sh M P
+
+where *M* is the instance parameter, and *P* is the number of cores available [incl. hyperthreaded cores]. 
+
 #### Short guide
 
 Create the executable by

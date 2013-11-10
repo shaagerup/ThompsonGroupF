@@ -14,3 +14,9 @@ oldSortingAlg
 newSortingAlgPar
 
 src/jsondrawing
+
+ppss_dir/*
+
+src/newSortingAlgParSimple
+
+src/binSortingAlgPar
